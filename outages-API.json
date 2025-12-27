@@ -1,0 +1,122 @@
+[
+  {
+    "vendor": "Slack",
+    "type": "statuspage",
+    "API": "https://status.slack.com/api/v2.0.0/current"
+  },
+  {
+    "vendor": "Coinbase",
+    "type": "statuspage",
+    "API": "https://status.coinbase.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Comcast Xfinity 🖕",
+    "type": "html",
+    "API": "https://www.xfinity.com/support/status"
+  },
+  {
+    "vendor": "Cloudflare",
+    "type": "statuspage",
+    "API": "https://www.cloudflarestatus.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Google (main servers)",
+    "type": "custom",
+    "API": "https://www.google.com/appsstatus/dashboard.json"
+  },
+  {
+    "vendor": "Twitter (X)",
+    "type": "html",
+    "API": "https://docs.x.com/status"
+  },
+  {
+    "vendor": "Steam",
+    "type": "third-party",
+    "API": "https://steamstat.us/api/v2"
+  },
+  {
+    "vendor": "Youtube",
+    "type": "custom",
+    "API": "https://www.google.com/appsstatus/dashboard.json"
+  },
+  {
+    "vendor": "Reddit",
+    "type": "statuspage",
+    "API": "https://www.redditstatus.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Microsoft",
+    "type": "custom",
+    "API": "https://portal.office.com/api/servicestatus"
+  },
+  {
+    "vendor": "Sophos",
+    "type": "statuspage",
+    "API": "https://status.sophos.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Oracle Cloud",
+    "type": "statuspage",
+    "API": "https://ocistatus.oraclecloud.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Login.gov",
+    "type": "statuspage",
+    "API": "https://status.login.gov/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Go Daddy",
+    "type": "statuspage",
+    "API": "https://status.godaddy.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Amazon / AWS",
+    "type": "html",
+    "API": "https://health.aws.amazon.com/health/status"
+  },
+  {
+    "vendor": "Meta",
+    "type": "statuspage",
+    "API": "https://metastatus.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Github",
+    "type": "statuspage",
+    "API": "https://www.githubstatus.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Apple",
+    "type": "custom",
+    "API": "https://www.apple.com/support/systemstatus/data/system_status_en_US.js"
+  },
+  {
+    "vendor": "Discord",
+    "type": "statuspage",
+    "API": "https://discordstatus.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "TikTok",
+    "type": "statuspage",
+    "API": "https://status.tiktok.com/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Spotify",
+    "type": "statuspage",
+    "API": "https://spotify.statuspage.io/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Zoom",
+    "type": "statuspage",
+    "API": "https://status.zoom.us/api/v2/incidents.json"
+  },
+  {
+    "vendor": "Twitch",
+    "type": "statuspage",
+    "API": "https://status.twitch.tv/api/v2/incidents.json"
+  },
+  {
+    "vendor": "NordVPN",
+    "type": "statuspage",
+    "API": "https://nordvpnstatus.com/api/v2/incidents.json"
+  }
+]
