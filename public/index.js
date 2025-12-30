@@ -147,7 +147,7 @@ function redirectToNewCard(month) {
 	// Loads the latest outages-#.json in the root dir
 	// If there isn't a file present, 404 error and create a message for the user
 	// This will stay to support legacy .json files
-	const response = await fetch(`./outages-${params.month}.json`)
+	const response = await fetch(`./outages-1.json`)
 
 	document.getElementById("loading").remove()
 
