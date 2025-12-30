@@ -18,11 +18,14 @@ const possibleBingos = [
 	[20, 16, 12, 8, 4],
 ]
 
-// Get the month and seed
+// Parse the month and seed from the URL
 const urlParams = new URLSearchParams(location.search)
 
 const params = {}
 
+// If month exists in URL, parse the Month as an int
+// ELSE get the current month index
+// Will likely remove later as I plan to create a baseline JSON of possible outages.
 if (urlParams.has("month")) {
 	params.month = parseInt(urlParams.get("month"))
 } else {
@@ -32,6 +35,7 @@ if (urlParams.has("month")) {
 	params.month = (year - 2021) * 12 + month - 9
 }
 
+// Potentially retire or refactor if seeding is reworked
 function stringToNumber(str) {
 	// Keep the old seeds working
 	let numeric = true
@@ -54,6 +58,8 @@ function stringToNumber(str) {
 	return result
 }
 
+// If seed exists in URL, parse the seed as int
+// Else set .seed = 1
 if (urlParams.has("seed")) {
 	params.seed = stringToNumber(urlParams.get("seed"))
 } else {
@@ -62,6 +68,8 @@ if (urlParams.has("seed")) {
 
 // Next two functions taken from https://stackoverflow.com/a/53758827/7595722
 // With some slight modification to make them look nicer
+
+// Function that generated a psedo random order for the bingo card array
 function shuffle(array, seed) {
 	let m = array.length
 	let t
@@ -79,11 +87,17 @@ function shuffle(array, seed) {
 	return array
 }
 
+// Generate a seed for the custom card function
 function random(seed) {
 	var x = Math.sin(seed) * 10000
 	return x - Math.floor(x)
 }
 
+// Creates a <td> from a name and link value
+// If no link exists, simply name the cell and mark as unchecked
+// If multiple links are presnt map the array into HTML strings
+// If only one link exists, place the name and link into the cell set URL text as name.
+//If the cell contains a link mark as cell-checked
 function createBingoCell(name, link) {
 	const cell = document.createElement("td")
 	if (link === "") {
@@ -105,6 +119,8 @@ function createBingoCell(name, link) {
 	return cell
 }
 
+
+// Converts a relative month index into a human-readable month and year string
 function getDateString(month) {
 	const date = new Date()
 	const year = Math.floor(month / 12) + 2021
@@ -113,9 +129,11 @@ function getDateString(month) {
 	return date.toLocaleDateString("en-US", { month: "long", year: "numeric" })
 }
 
+// Generates a new seed and sets the current month index value and encodes as a URL string
+//Fixed the if (!url.indexOf("?") !== -1) logic error. Thank mr GPT
 function redirectToNewCard(month) {
 	let url = window.location.href
-	if (!url.indexOf("?") !== -1) {
+	if (url.includes("?")) {
 		url = url.slice(0, url.indexOf("?"))
 	}
 	url += `?month=${month}`
@@ -124,8 +142,12 @@ function redirectToNewCard(month) {
 }
 
 // Fetch the data
+
 ;(async () => {
-	const response = await fetch(`./outages-${params.month}.json`)
+	// Loads the latest outages-#.json in the root dir
+	// If there isn't a file present, 404 error and create a message for the user
+	// This will stay to support legacy .json files
+	const response = await fetch(`./outages-1.json`)
 
 	document.getElementById("loading").remove()
 
