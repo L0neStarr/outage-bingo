@@ -1,3 +1,5 @@
+//const { resolveTripleslashReference } = require("typescript")
+
 const canvas = document.getElementById("confetti")
 const confetti = new JSConfetti({ canvas })
 
@@ -23,9 +25,10 @@ const urlParams = new URLSearchParams(location.search)
 
 const params = {}
 
-// If month exists in URL, parse the Month as an int
-// ELSE get the current month index
-// Will likely remove later as I plan to create a baseline JSON of possible outages.
+
+
+// If month exists in URL, parse the Month as a number since 2021 ELSE get the current month index
+// ***LEGACY CODE*** Support old JSON files
 if (urlParams.has("month")) {
 	params.month = parseInt(urlParams.get("month"))
 } else {
@@ -33,11 +36,12 @@ if (urlParams.has("month")) {
 	const year = date.getUTCFullYear()
 	const month = date.getUTCMonth()
 	params.month = (year - 2021) * 12 + month - 9
+	
 }
 
-// Potentially retire or refactor if seeding is reworked
+// ***LEGACY CODE*** Keeps old seeds working
 function stringToNumber(str) {
-	// Keep the old seeds working
+
 	let numeric = true
 	for (let c of str) {
 		if (c < "0" || c > "9") {
@@ -66,6 +70,16 @@ if (urlParams.has("seed")) {
 	params.seed = 1
 }
 
+//Parse the new URL format
+if (urlParams.has("YYYY")) {
+	params.yyyy = parseInt(urlParams.get("YYYY"))
+	params.mm = parseInt(urlParams.get("MM"))
+}else {
+	const date = new Date()
+	params.yyyy = date.getUTCFullYear()
+	params.mm = date.getUTCMonth() + 1
+}
+
 // Next two functions taken from https://stackoverflow.com/a/53758827/7595722
 // With some slight modification to make them look nicer
 
@@ -76,7 +90,7 @@ function shuffle(array, seed) {
 	let i
 
 	while (m) {
-		i = Math.floor(random(seed) * m--)
+		i = Math.floor(randomSeed(seed) * m--)
 
 		t = array[m]
 		array[m] = array[i]
@@ -88,7 +102,7 @@ function shuffle(array, seed) {
 }
 
 // Generate a seed for the custom card function
-function random(seed) {
+function randomSeed(seed) {
 	var x = Math.sin(seed) * 10000
 	return x - Math.floor(x)
 }
@@ -130,7 +144,8 @@ function getDateString(month) {
 }
 
 // Generates a new seed and sets the current month index value and encodes as a URL string
-//Fixed the if (!url.indexOf("?") !== -1) logic error. Thank mr GPT
+// Fixed the if (!url.indexOf("?") !== -1) logic error. Thank mr GPT
+// ***LEGACY CODE*** Support creating a new bingo card on older JSONs
 function redirectToNewCard(month) {
 	let url = window.location.href
 	if (url.includes("?")) {
@@ -141,33 +156,62 @@ function redirectToNewCard(month) {
 	window.location.assign(url)
 }
 
-// Fetch the data
+// New card randomizer behavior
 
+function createNewCard(yyyy, mm) {
+	let url = window.location.href
+	if(url.includes("?")) {
+		url =  url.slice(0, url.indexOf("?"))
+	}
+	url += `?YYYY=${yyyy}`
+	url += `&MM=${mm}`
+	url += `&seed=${Math.floor(Math.random() * 99999)}`
+}
+
+// Get the monthly outage bingo card 
+async function apiFetch(yyyy, mm) {
+	const mmPad = String(mm).padStart(2, "0")
+	const response = await fetch(`/api/outage-bingo/${yyyy}-${mmPad}`,{cache: "no-store"})
+	if(!response.ok) throw new Error (`API Error: ${response.status}`)
+	
+	return await response.json()
+}
+
+
+// Fetch the data
 ;(async () => {
 	// Loads the latest outages-#.json in the root dir
 	// If there isn't a file present, 404 error and create a message for the user
 	// This will stay to support legacy .json files
-	const response = await fetch(`./outages-1.json`)
+	// const response = await fetch(`./outages-1.json`)
 
-	document.getElementById("loading").remove()
+ 	document.getElementById("loading").remove()
 
-	if (response.status === 404) {
-		// Whoops, looks like we haven't done this month's card yet
-		const whoops = document.createElement("p")
-		whoops.innerText =
-			"Whoops, looks like we haven't made a card for this month yet, check back later"
-		document.querySelector("body").appendChild(whoops)
-		return
-	}
+  	let data
+  	try {
+   	 // apiFetch returns the parsed JSON array
+    	data = await apiFetch(params.yyyy, params.mm)
+  	} catch (err) {
+    	// If the file isn't there (404) or anything else fails, show message
+    	const whoops = document.createElement("p")
+    	whoops.innerText =
+      	"Whoops, looks like we haven't made a card for this month yet, check back later"
+    	document.querySelector("body").appendChild(whoops)
+    	console.error(err)
+    	return
+  	}
 
-	const title = document.createElement("h2")
-	title.innerText = getDateString(params.month)
+  // If you want the header to reflect the YYYY/MM params, do this:
+  const title = document.createElement("h2")
+  title.innerText = new Date(Date.UTC(params.yyyy, params.mm, 1)).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  })
+  document.querySelector("body").appendChild(title)
 
-	document.querySelector("body").appendChild(title)
+  const shuffled = shuffle(data, params.seed)
 
-	const data = await response.json()
 
-	const shuffled = shuffle(data, params.seed)
 	const table = document.createElement("table")
 	// We're going to do a new array so that the final card will be in one
 	// smaller array just in case we have more than 24 options, and so that

@@ -14,13 +14,10 @@
 	"observability": {
 		"enabled": true
 	},
-	"triggers": {
-	"crons": ["0 * * * *"]
-  	},
   "r2_buckets": [
     {
       "binding": "BINGO_BUCKET",
       "bucket_name": "outage-bingo",
     }
   ]
-}	
+}
