@@ -158,12 +158,13 @@ function redirectToNewCard(month) {
 
 function createNewCard(yyyy, mm) {
 	let url = window.location.href
-	if(url.includes("?")) {
-		url =  url.slice(0, url.indexOf("?"))
+	if (url.includes("?")) {
+		url = url.slice(0, url.indexOf("?"))
 	}
 	url += `?YYYY=${yyyy}`
 	url += `&MM=${mm}`
 	url += `&seed=${Math.floor(Math.random() * 99999)}`
+	window.location.assign(url)
 }
 
 // Get the monthly outage bingo card 
@@ -256,7 +257,6 @@ async function apiFetch(yyyy, mm) {
 	newCard.innerText = "Get my own card"
 	newCard.onclick = () => {
 		createNewCard(params.yyyy, params.mm)
-		window.location.assign(url)
 	}	
 	
 	document.querySelector("body").appendChild(newCard)
