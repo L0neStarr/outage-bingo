@@ -23,9 +23,8 @@ const possibleBingos = [
 // Parse the month and seed from the URL
 const urlParams = new URLSearchParams(location.search)
 
+// Array of paramaters for Bingo
 const params = {}
-
-
 
 // If month exists in URL, parse the Month as a number since 2021 ELSE get the current month index
 // ***LEGACY CODE*** Support old JSON files
@@ -41,7 +40,6 @@ if (urlParams.has("month")) {
 
 // ***LEGACY CODE*** Keeps old seeds working
 function stringToNumber(str) {
-
 	let numeric = true
 	for (let c of str) {
 		if (c < "0" || c > "9") {
@@ -180,16 +178,16 @@ async function apiFetch(yyyy, mm) {
 
 // Fetch the data
 ;(async () => {
-	// Loads the latest outages-#.json in the root dir
+	// Loads the latest outages-#.json from the root dir
 	// If there isn't a file present, 404 error and create a message for the user
 	// This will stay to support legacy .json files
-	// const response = await fetch(`./outages-1.json`)
+	// OLD BEHAVIOR const response = await fetch(`./outages-1.json`)
 
  	document.getElementById("loading").remove()
 
   	let data
   	try {
-   	 // apiFetch returns the parsed JSON array
+		// apiFetch returns the parsed JSON array
     	data = await apiFetch(params.yyyy, params.mm)
   	} catch (err) {
     	// If the file isn't there (404) or anything else fails, show message
@@ -201,15 +199,15 @@ async function apiFetch(yyyy, mm) {
     	return
   	}
 
-  // If you want the header to reflect the YYYY/MM params, do this:
-  const title = document.createElement("h2")
-  title.innerText = new Date(Date.UTC(params.yyyy, params.mm, 1)).toLocaleDateString("en-US", {
+	// Set the header to reflect the YYYY/MM params
+	const title = document.createElement("h2")
+	title.innerText = new Date(Date.UTC(params.yyyy, params.mm, 1)).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
-  })
-  document.querySelector("body").appendChild(title)
+	})
+	document.querySelector("body").appendChild(title)
 
-  const shuffled = shuffle(data, params.seed)
+	const shuffled = shuffle(data, params.seed)
 
 
 	const table = document.createElement("table")
@@ -245,12 +243,21 @@ async function apiFetch(yyyy, mm) {
 
 	document.querySelector("body").appendChild(table)
 
+	/* Legacy New card button and function call.
 	const newCard = document.createElement("button")
 	newCard.innerText = "Get my own card"
 	newCard.onclick = () => {
 		redirectToNewCard(params.month)
 	}
+	*/
 
+	// New card with new function call
+	const newCard = document.createElement("button")
+	newCard.innerText = "Get my own card"
+	newCard.onclick = () => {
+		createNewCard(params.yyyy, params.mm)
+	}	
+	
 	document.querySelector("body").appendChild(newCard)
 
 	let numBingos = 0
