@@ -256,6 +256,7 @@ async function apiFetch(yyyy, mm) {
 	newCard.innerText = "Get my own card"
 	newCard.onclick = () => {
 		createNewCard(params.yyyy, params.mm)
+		window.location.assign(url)
 	}	
 	
 	document.querySelector("body").appendChild(newCard)
