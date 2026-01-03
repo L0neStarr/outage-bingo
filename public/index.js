@@ -1,5 +1,3 @@
-//const { resolveTripleslashReference } = require("typescript")
-
 const canvas = document.getElementById("confetti")
 const confetti = new JSConfetti({ canvas })
 

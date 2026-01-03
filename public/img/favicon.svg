@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Created using Krita: https://krita.org -->
+<svg xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:krita="http://krita.org/namespaces/svg/krita"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    width="34.56pt"
+    height="34.56pt"
+    viewBox="0 0 34.56 34.56">
+<defs/>
+<rect id="shape0" transform="translate(1.08, 1.08)" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="round" width="32.4" height="32.4" rx="6.59999948337289" ry="6.59999948337289"/><path id="shape1" transform="matrix(1 0 0 0.977900559981343 11.76 1.3499998675568)" fill="none" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2" d="M0 32.58L0 0" sodipodi:nodetypes="cc"/><path id="shape2" transform="matrix(1 0 0 0.977900559981343 22.56 1.3499998675568)" fill="none" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2" d="M0 0L0 32.58" sodipodi:nodetypes="cc"/><path id="shape3" transform="matrix(0.977802408233092 0 0 1 1.43860208396819 22.56)" fill="none" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2" d="M0 0L32.4 0" sodipodi:nodetypes="cc"/><path id="shape4" transform="matrix(0.977802408233092 0 0 1 1.35059986790171 11.76)" fill="none" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2" d="M0 0L32.49 0" sodipodi:nodetypes="cc"/><rect id="shape5" transform="translate(9.72, 9.72)" fill="#68ffc6" fill-rule="evenodd" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="bevel" width="15.12" height="15.12" rx="3.91308614836807" ry="3.91308614836807"/>
+</svg>
