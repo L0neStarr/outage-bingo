@@ -110,15 +110,14 @@ function randomSeed(seed) {
 //If the cell contains a link mark as cell-checked
 function createBingoCell(name, link) {
 	const cell = document.createElement("td")
-	if (link === "") {
+
+	if (link === "" || !link?.length) {
 		cell.innerText = name
 		cell.className = "cell-unchecked"
 	} else {
 		if (Array.isArray(link)) {
 			let linkHTML = link
-				.map((href, index) => {
-					return `<a href="${href}">[${index + 1}]</a>`
-				})
+				.map((href, index) => `<a href="${href}">[${index + 1}]</a>`)
 				.join("")
 			cell.innerHTML = `<p>${name}</p><div>${linkHTML}</div>`
 		} else {
@@ -223,10 +222,10 @@ async function apiFetch(yyyy, mm) {
 			if (i === 2 && j === 2) {
 				// This is the free space
 				cell = document.createElement("td")
-				cell.innerText = "Free Space (Github Actions)"
+				cell.innerText = "Free Space (Fortnet Vulnerability)"
 				cell.className = "cell-checked"
 				finalCard.push({
-					name: "Free Space (Github Actions)",
+					name: "Free Space (Fortinet Vulnerability)",
 					link: "free",
 				})
 			} else {
@@ -259,15 +258,16 @@ async function apiFetch(yyyy, mm) {
 	
 	document.querySelector("body").appendChild(newCard)
 
-	let numBingos = 0
-	possibleBingos.forEach((line) => {
-		if (
-			line.every((index) => {
-				return finalCard[index].link !== ""
-			})
-		)
-			numBingos++
-	})
+let numBingos = 0
+possibleBingos.forEach((line) => {
+	if (
+		line.every((index) => {
+			const link = finalCard[index].link // CHANGED: store link for clearer/consistent checked logic
+			return (Array.isArray(link) ? link.length > 0 : link !== "") // CHANGED: [] is now treated as unchecked; non-empty array or non-empty string counts as checked
+		})
+	)
+		numBingos++
+})
 
 	if (numBingos > 0) {
 		setTimeout(() => {
