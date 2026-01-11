@@ -18,6 +18,9 @@ const possibleBingos = [
 	[20, 16, 12, 8, 4],
 ]
 
+var storageDarkmode = localStorage.getItem('darkmode');
+
+
 // Parse the month and seed from the URL
 const urlParams = new URLSearchParams(location.search)
 
@@ -36,6 +39,7 @@ if (urlParams.has("month")) {
 	
 }
 
+// Functions
 // ***LEGACY CODE*** Keeps old seeds working
 function stringToNumber(str) {
 	let numeric = true
@@ -103,21 +107,23 @@ function randomSeed(seed) {
 	return x - Math.floor(x)
 }
 
-// Creates a <td> from a name and link value
+// Creates a <div> from a name and link value
 // If no link exists, simply name the cell and mark as unchecked
 // If multiple links are presnt map the array into HTML strings
 // If only one link exists, place the name and link into the cell set URL text as name.
 //If the cell contains a link mark as cell-checked
 function createBingoCell(name, link) {
-	const cell = document.createElement("td")
+	const cell = document.createElement("div")
 
-	if (link === "" || !link?.length) {
+	if (link === "") {
 		cell.innerText = name
 		cell.className = "cell-unchecked"
 	} else {
 		if (Array.isArray(link)) {
 			let linkHTML = link
-				.map((href, index) => `<a href="${href}">[${index + 1}]</a>`)
+				.map((href, index) => {
+					return `<a href="${href}">[${index + 1}]</a>`
+				})
 				.join("")
 			cell.innerHTML = `<p>${name}</p><div>${linkHTML}</div>`
 		} else {
@@ -152,7 +158,6 @@ function redirectToNewCard(month) {
 }
 
 // New card randomizer behavior
-
 function createNewCard(yyyy, mm) {
 	let url = window.location.href
 	if (url.includes("?")) {
@@ -172,6 +177,22 @@ async function apiFetch(yyyy, mm) {
 	
 	return await response.json()
 }
+
+// Dark mode theme switch
+function pageThemeSwitch(request) {
+	switch (request) {
+		case "enable":
+			document.body.classList.add("darkmode");
+			document.querySelector("link[rel~='icon']").href = "img/favicon-dark.svg";
+			localStorage.setItem("darkmode", "active");
+			break;
+
+		case "disable":
+			document.body.classList.remove("darkmode");
+			document.querySelector("link[rel~='icon']").href = "img/favicon.svg";
+			localStorage.setItem("darkmode", null);
+	};
+};
 
 
 // Fetch the data
@@ -208,24 +229,28 @@ async function apiFetch(yyyy, mm) {
 	const shuffled = shuffle(data, params.seed)
 
 
-	const table = document.createElement("table")
+	// Cece note: converting the table element into a grid to handle styling
+	// and sizing issues with the table approach
+	const table = document.createElement("div");
+	table.id = "bingo-table";
 	// We're going to do a new array so that the final card will be in one
 	// smaller array just in case we have more than 24 options, and so that
 	// we can include the free space
 	const finalCard = []
 
 	for (let i = 0; i < 5; i++) {
-		const row = document.createElement("tr")
+		const row = document.createElement("div")
+		row.className = "bingo-row";
 
 		for (let j = 0; j < 5; j++) {
 			let cell
 			if (i === 2 && j === 2) {
 				// This is the free space
-				cell = document.createElement("td")
-				cell.innerText = "Free Space (Fortnet Vulnerability)"
+				cell = document.createElement("div")
+				cell.innerText = "Free Space (Github Actions)"
 				cell.className = "cell-checked"
 				finalCard.push({
-					name: "Free Space (Fortinet Vulnerability)",
+					name: "Free Space (Github Actions)",
 					link: "free",
 				})
 			} else {
@@ -233,6 +258,7 @@ async function apiFetch(yyyy, mm) {
 				finalCard.push(cellData)
 				cell = createBingoCell(cellData.name, cellData.link)
 			}
+
 			row.appendChild(cell)
 		}
 
@@ -251,6 +277,7 @@ async function apiFetch(yyyy, mm) {
 
 	// New card with new function call
 	const newCard = document.createElement("button")
+	newCard.id = "card-new"
 	newCard.innerText = "Get my own card"
 	newCard.onclick = () => {
 		createNewCard(params.yyyy, params.mm)
@@ -258,16 +285,29 @@ async function apiFetch(yyyy, mm) {
 	
 	document.querySelector("body").appendChild(newCard)
 
-let numBingos = 0
-possibleBingos.forEach((line) => {
-	if (
-		line.every((index) => {
-			const link = finalCard[index].link // CHANGED: store link for clearer/consistent checked logic
-			return (Array.isArray(link) ? link.length > 0 : link !== "") // CHANGED: [] is now treated as unchecked; non-empty array or non-empty string counts as checked
-		})
-	)
-		numBingos++
-})
+	// Checking url to see if the current card is a user created one, which creates the popup
+	if (window.location.href.includes("?")) {
+		const newDiv = document.createElement("div");
+		monthInt = parseInt(/MM=([0-9]+)&/g.exec(window.location.href)[1]);
+		monthTitle = new Date(Date.UTC(2020, monthInt, 1)).toLocaleDateString("en-US", {month: "long"});
+
+		newDiv.id = "card-linkbox";
+		newDiv.innerHTML = `<p>${window.location.href}</p><p>Copied :D</p>`;
+		newDiv.onclick = () => {
+			navigator.clipboard.writeText(`Check out my outage bingo board for ${monthTitle}: ${window.location.href}`);
+		};
+		document.body.appendChild(newDiv);
+	};
+
+	let numBingos = 0
+	possibleBingos.forEach((line) => {
+		if (
+			line.every((index) => {
+				return finalCard[index].link !== ""
+			})
+		)
+			numBingos++
+	})
 
 	if (numBingos > 0) {
 		setTimeout(() => {
@@ -287,3 +327,7 @@ possibleBingos.forEach((line) => {
 		marquee.innerText = "🔥".repeat(500)
 	}
 })()
+
+
+// Dark mode is auto enabled if the local storage variable is already set
+if (storageDarkmode === "active") pageThemeSwitch("enable");
