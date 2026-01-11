@@ -115,15 +115,13 @@ function randomSeed(seed) {
 function createBingoCell(name, link) {
 	const cell = document.createElement("div")
 
-	if (link === "") {
+	if (link === "" || !link?.length) {
 		cell.innerText = name
 		cell.className = "cell-unchecked"
 	} else {
 		if (Array.isArray(link)) {
 			let linkHTML = link
-				.map((href, index) => {
-					return `<a href="${href}">[${index + 1}]</a>`
-				})
+				.map((href, index) => `<a href="${href}">[${index + 1}]</a>`)
 				.join("")
 			cell.innerHTML = `<p>${name}</p><div>${linkHTML}</div>`
 		} else {
@@ -247,10 +245,10 @@ function pageThemeSwitch(request) {
 			if (i === 2 && j === 2) {
 				// This is the free space
 				cell = document.createElement("div")
-				cell.innerText = "Free Space (Github Actions)"
+				cell.innerText = "Free Space (Fortnet Vulnerability)"
 				cell.className = "cell-checked"
 				finalCard.push({
-					name: "Free Space (Github Actions)",
+					name: "Free Space (Fortnet Vulnerability)",
 					link: "free",
 				})
 			} else {
@@ -303,7 +301,8 @@ function pageThemeSwitch(request) {
 	possibleBingos.forEach((line) => {
 		if (
 			line.every((index) => {
-				return finalCard[index].link !== ""
+				const link = finalCard[index].link // CHANGED: store link for clearer/consistent checked logic
+				return (Array.isArray(link) ? link.length > 0 : link !== "") // CHANGED: [] is now treated as unchecked; non-empty array or non-empty string counts as checked
 			})
 		)
 			numBingos++
