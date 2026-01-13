@@ -2,60 +2,200 @@
 <html>
 	<head>
 		<title>Major Breach and Outage Bingo</title>
-		<link rel="icon" type="image/x-icon" href="/img/favicon.svg">
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+		<link rel="icon" type="image/x-icon" href="/img/favicon.svg">
 		<style type="text/css">
+			:root {
+				/* numbers */
+				--n-margin-generic: 16px;
+				--n-table-border-size: 4px;
+				--n-table-border-radius: 10px;
+				--n-linkbox-transition-time: 1.5s;
+				--n-linkbox-bezier: cubic-bezier(0.6, 0, .5, .5);
+				--n-mobile-button-size: 38px;
+
+				/* color */
+				--c-svg-filter-bg-match: invert(100%) sepia(0%) saturate(1%) hue-rotate(326deg) brightness(106%) contrast(101%);
+				/* ^ update this filter anytime the background color needs to be changed */
+				/* https://codepen.io/sosuke/pen/Pjoqqp */
+				/* https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element */
+				--c-background: white;
+				--c-background-secondary: rgb(109, 218, 181);
+				--c-text-generic: black;
+				--c-text-bold: black;
+				--c-link: rgb(170, 127, 255);
+				--c-link-checked: rgb(255, 66, 183);
+
+				--c-table-border: #161A1D;
+				--c-table-cell-checked: aquamarine;
+				--c-table-cell-checked-2: rgb(109, 218, 181);
+				--c-table-cell-unchecked: white;
+				--c-table-cell-unchecked-2: azure;
+
+				--c-card-button: azure;
+				--c-card-button-border: #aaa;
+				--c-darkmode-toggle: aquamarine;
+				--c-darkmode-toggle-svg: #161A1D;
+				--c-darkmode-toggle-border: #161A1D;
+				--c-github-1: white;
+				--c-github-2: black;
+			}
+			.darkmode {
+				--c-svg-filter-bg-match: invert(3%) sepia(5%) saturate(1750%) hue-rotate(155deg) brightness(96%) contrast(96%);
+				--c-background: #0B0D0E;
+				--c-background-secondary: rgb(109, 218, 181);
+				--c-text-generic: #bbb;
+
+				--c-table-border: #4E5A65;
+				--c-table-cell-checked: rgb(109, 218, 181);
+				--c-table-cell-checked-2: rgb(100, 201, 167);
+				--c-table-cell-unchecked: #161A1D;
+				--c-table-cell-unchecked-2: #22262B;
+
+				--c-card-button: #6a6a6a;
+				--c-card-button-border: #555;
+				--c-darkmode-toggle: #0B0D0E;
+				--c-darkmode-toggle-svg: #888;
+				--c-darkmode-toggle-border: rgb(109, 218, 181);
+				--c-github-1: #888;
+			}
+
+			/* fonts */
+
+			
+			/* elements */
+			/* background idea inspired by https://obby.dog/ */
+			/* special thanks to this stack overflow thread for helping get the scrolling gradient to work: https://stackoverflow.com/questions/36612631/background-position-not-working-with-css-animation-and-linear-gradient */
 			body {
-				font-family: sans;
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+				z-index: 0;
 				min-height: 100vh;
 				margin: 0;
-			}
-			h1 {
-				margin-bottom: 0;
-			}
-			table {
-				width: min(80vw, 75vh);
-				height: min(80vw, 75vh);
-			}
-			tr {
-				height: 20%;
-			}
-			td {
-				width: 20%;
-				max-width: 160px;
-				height: 20%;
-				max-height: 160px;
-				border: 1px solid black;
-				text-align: center;
-				border-radius: 8px;
-			}
-			td a {
+
+				background-image: linear-gradient(var(--c-background), var(--c-background-secondary) 15%, var(--c-background) 30%);
+				/* filter: invert(3%) sepia(5%) saturate(1750%) hue-rotate(155deg) brightness(96%) contrast(96%); */
+				/* background-size: 50px 50px, 30% 200%; */
+				background-size: 30% 200%;
+				/* background-position: 25px 25px, 0 0; */
+
 				display: flex;
-				justify-content: center;
+				gap: 8px;
+				flex-direction: column;
 				align-items: center;
-				width: 100%;
-				height: 100%;
+
+				font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+				animation: body-gradient-slide 10s linear infinite;
 			}
+
+			body::before {
+				content: "";
+				z-index: 1;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+
+				background-image: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:krita="http://krita.org/namespaces/svg/krita" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="37.5252pt" height="37.5252pt" viewBox="0 0 37.5252 37.5252"><defs/><rect id="shape0" transform="translate(1.50100639503905, 1.50100639503905)" fill="black" fill-rule="evenodd" width="36.0241534809373" height="36.0241534809373"/></svg>');
+				background-size: 50px 50px;
+				background-position: 25px 25px;
+				filter: var(--c-svg-filter-bg-match);
+
+				animation: body-grid-slide 10s linear infinite;
+			}
+
+			body > * { z-index: 2}
+
+			h1, h2, button, td { color: var(--c-text-generic) }
+
+			h1, h2, button { margin: 0 }
+
+			h1 { text-align: center }
+
 			button {
 				cursor: pointer;
 				padding: 10px;
-				background-color: azure;
-				border-radius: 4px;
-				border: 1px #ccc solid;
 			}
-			.cell-checked {
-				background-color: aquamarine;
+
+			button:hover { animation: button-hover-react .1s ease-out forwards }
+
+			a {
+				color: var(--c-link);
+				text-decoration: solid underline 2px;
 			}
+			a:visited { color: var(--c-link-checked) }
+
+
+			/* named */
+			/* "table" */
+			#bingo-table {
+				width: min(80vw, 70vh);
+				aspect-ratio: 1;
+				background-color: var(--c-table-border);
+				border: solid var(--n-table-border-size) var(--c-table-border);
+				border-radius: var(--n-table-border-radius);
+
+				display: grid;
+				grid-auto-rows: calc((100% - var(--n-table-border-size) * 4) / 5);
+				gap: var(--n-table-border-size);
+			}
+
+			.bingo-row {
+				display: grid;
+				grid-auto-flow: column;
+				grid-auto-columns: calc((100% - var(--n-table-border-size) * 4) / 5);
+				gap: var(--n-table-border-size);
+			}
+			.bingo-row:first-child div:first-child { border-top-left-radius: var(--n-table-border-radius) }
+			.bingo-row:first-child div:last-child { border-top-right-radius: var(--n-table-border-radius) }
+			.bingo-row:last-child div:first-child { border-bottom-left-radius: var(--n-table-border-radius) }
+			.bingo-row:last-child div:last-child { border-bottom-right-radius: var(--n-table-border-radius) }
+
+			.cell-checked, .cell-unchecked {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				padding: 5px;
+				overflow: hidden;
+				font-size: min(100%, 1.7cqh, 2.5cqw);
+				/* credit to this stack overflow for introducing this fuck ass unit i've never heard of before; https://stackoverflow.com/questions/30693928/how-to-make-font-size-relative-to-parent-div */
+			}
+
 			.cell-unchecked {
-				background-color: rgba(255, 255, 255, 0.9);
+				color: var(--c-text-generic);
+				background-image: linear-gradient(var(--c-table-cell-unchecked) 80%, var(--c-table-cell-unchecked-2));
 			}
+
+			.cell-checked {
+				color: var(--c-text-bold);
+				background-image: linear-gradient(var(--c-table-cell-checked) 70%, var(--c-table-cell-checked-2));
+				font-weight: bold;
+			}
+
+			.cell-checked a {
+				display: grid;
+				align-items: center;
+			}
+
+			.cell-checked div {
+				width: 91%;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-evenly;
+			}
+
+			.cell-checked div a {
+				flex: 1 0 30%;
+				/* font-size: 133%; */
+			}
+
+			/* other */
 			#confetti {
+				z-index: 10;
 				position: fixed;
 				top: 0;
 				left: 0;
@@ -63,26 +203,230 @@
 				height: 100vh;
 				pointer-events: none;
 			}
+
 			.invis {
 				visibility: hidden;
 			}
-			td div {
-				display: flex;
-				justify-content: space-evenly;
+
+			#card-new {
+				color: var(--c-text-bold);
+				background-color: var(--c-card-button);
+				font-weight: bold;
+				border-radius: 4px;
+				border: 1px var(--c-card-button-border) solid;
 			}
-			td div a {
-				width: auto;
-				height: auto;
+
+			#buttons-list {
+				z-index: 3;
+				position: fixed;
+				bottom: var(--n-margin-generic);
+				right: var(--n-margin-generic);
+
+				display: grid;
+				grid-auto-flow: column;
+				gap: 3px;
+				align-items: center;
+			}
+
+			#site-button { image-rendering: pixelated }
+			.darkmode #site-button { filter: brightness(53%) }
+
+			#to-git-source button {
+				height: 38px;
 				padding: 2px;
+				border: solid 2px black;
+				border-radius: 50%;
+				background-color: var(--c-github-1);
+			}
+
+			#to-git-source svg {
+				height: 30px;
+				width: 30px;
+			}
+
+			#darkmode-switch {
+				height: 38px;
+				width: 38px;
+				padding: 0;
+
+				display: grid;
+				justify-content: center;
+				align-items: center;
+
+				background-color: var(--c-darkmode-toggle);
+				border: solid 2px var(--c-darkmode-toggle-border);
+				border-radius: 50%;
+			}
+
+			#darkmode-switch svg {
+				color: var(--c-darkmode-toggle-svg);
+				height: 28px;
+				width: 28px;
+			}
+			#darkmode-switch svg:last-child { display: none; }
+
+			/* dark mode switch behavior */
+			.darkmode #darkmode-switch svg:first-child { display: none; }
+			.darkmode #darkmode-switch svg:last-child { display: block; }
+
+			#card-linkbox {
+				max-width: calc(100vw - 4 * var(--n-margin-generic));
+				position: relative;
+				padding: 10px;
+				border: 1px var(--c-card-button-border) solid;
+				border-radius: 4px;
+				margin-bottom: var(--n-margin-generic);
+				cursor: pointer;
+			}
+
+			#card-linkbox::before {
+				content: "";
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				z-index: -1;
+				background: var(--c-card-button);
+				transition: filter var(--n-linkbox-transition-time) var(--n-linkbox-bezier);
+			}
+
+			#card-linkbox p {
+				color: var(--c-text-bold);
+				margin: 0;
+				text-align: center;
+				pointer-events: none;
+				transition: opacity var(--n-linkbox-transition-time) var(--n-linkbox-bezier);
+				
+				-webkit-user-select: none; /* Safari */
+				-ms-user-select: none; /* IE 10 and IE 11 */
+				user-select: none; /* Standard syntax */
+			}
+
+			#card-linkbox p:last-child { 
+				position: absolute;
+				inset-block-start: .8cqh;
+				inset-inline-start: 50%;
+				transform: translate(-50%);
+				font-size: large;
+				opacity: 0;
+			}
+
+			#card-linkbox:hover::before { 
+				background-color: var(--c-table-cell-checked);
+			}
+			#card-linkbox:hover p { font-weight: bold }
+
+			#card-linkbox:active::before {
+				filter: brightness(200%);
+				transition: 0s;
+			}
+			#card-linkbox:active p { transition: 0s }
+			#card-linkbox:active p:first-child { opacity: .1 }
+			#card-linkbox:active p:last-child { opacity: 1 }
+
+
+			/* animations */
+			@keyframes body-grid-slide {
+				0% {background-position: 25px 25px}
+				100% {background-position: 225px 225px}
+			}
+
+			@keyframes body-gradient-slide {
+				0% {background-position: 0 100%}
+				100% {background-position: 0 -100%}
+			}
+
+			@keyframes button-hover-react {
+				0% {position: relative; bottom: 0;}
+				90% {position: relative; bottom: 6px;}
+				100% {position: relative; bottom: 3px;}
+			}
+
+			@keyframes button-mobile-press-react {
+				0% {position: relative; bottom: 6px;}
+				100% {position: relative; bottom: 0;}
+			}
+
+
+			/* mobile adjustments */
+			@media (max-aspect-ratio: .823) {
+				body > *:last-child { margin-bottom: var(--n-mobile-button-size) }
+
+				button:hover { animation: none }
+				button:active { animation: button-mobile-press-react .1s linear forwards }
+				/* button:hover, button:active { animation: button-mobile-press-react .1s linear forwards } */
+				/* https://stackoverflow.com/questions/22559756/changing-hover-to-touch-click-for-mobile-devices */
+
+				#bingo-table {
+					width: calc(100vw - var(--n-margin-generic));
+					/* height: calc(100vh - var(--n-margin-generic) * 2 - var(--n-mobile-button-size) * 2); */
+					aspect-ratio: 1;
+				}
+
+				#card-linkbox p { font-size: 3cqw }
+
+				#card-linkbox:hover::before {background-color: var(--c-card-button);}
+
+				#site-button { height: calc(var(--n-mobile-button-size) - 16px) }
+
+				#to-git-source button { height: var(--n-mobile-button-size) }
+
+				#to-git-source svg {
+					height: calc(var(--n-mobile-button-size) - 8px);
+					width: calc(var(--n-mobile-button-size) - 8px);
+				}
+
+				#darkmode-switch {
+					height: var(--n-mobile-button-size);
+					width: var(--n-mobile-button-size);
+				}
+
+				#darkmode-switch svg {
+					height: calc(var(--n-mobile-button-size) - 15px);
+					width: calc(var(--n-mobile-button-size) - 15px);
+				}
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id="confetti"></canvas>
 		<marquee id="bingo" class="invis"></marquee>
+
 		<h1>Major Breach™ and Outage Bingo</h1>
-		<a href="https://github.com/L0neStarr/outage.bingo">Source</a>
 		<div id="loading">Loading card...</div>
+
+		<!-- buttons -->
+		<div id="buttons-list">
+			<img id="site-button" src="./img/site-button.png">
+
+			<button id="darkmode-switch" onclick="
+				let storageDarkmode = localStorage.getItem('darkmode');
+				storageDarkmode !== 'active' ? pageThemeSwitch('enable') : pageThemeSwitch('disable');
+			">
+				<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:krita="http://krita.org/namespaces/svg/krita" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="60pt" height="60pt" viewBox="0 0 60 60">
+					<defs></defs>
+					<path id="shape0" transform="translate(-0.00167544333463079, -3.10862446895044e-15)" fill="currentColor" fill-rule="evenodd" d="M19.0997 0C6.0507 5.46613 -1.67502 19.1072 0.308859 33.1785C2.29274 47.2498 13.4849 58.1952 27.5309 59.8003C41.5769 61.4055 54.927 53.2648 60.0017 40.0001C29.9809 53.6749 5.57525 24.6645 19.0997 0Z"></path>
+				</svg>
+				<svg xmlns="http://www.w3.org/2000/svg" 
+					xmlns:xlink="http://www.w3.org/1999/xlink"
+					xmlns:krita="http://krita.org/namespaces/svg/krita"
+					xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+					width="60pt"
+					height="60pt"
+					viewBox="0 0 60 60">
+				<defs/>
+				<circle id="shape0" transform="translate(9.6, 9.6)" r="20.4" cx="20.4" cy="20.4" fill="currentColor" fill-rule="evenodd"/><rect id="shape1" transform="translate(27.6, 8.88178419700125e-16)" fill="currentColor" fill-rule="evenodd" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape01" transform="translate(27.6, 52.8)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape02" transform="matrix(-4.44089209850063e-16 1 -1 -4.44089209850063e-16 60.0000000000001 27.6000000000001)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape011" transform="matrix(-4.44089209850063e-16 1 -1 -4.44089209850063e-16 7.19999999999992 27.6000000000001)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape03" transform="matrix(0.866551611356727 0.499087472147994 -0.499087472147994 0.866551611356727 42.892900297184 2.80564172614329)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape012" transform="matrix(0.866551611356727 0.499087472147994 -0.499087472147994 0.866551611356727 16.5410817677699 48.5595668057784)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape04" transform="matrix(0.511425238741437 0.859327775169796 -0.859327775169796 0.511425238741437 54.5524126821145 12.5948561773495)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape013" transform="matrix(0.511425238741437 0.859327775169796 -0.859327775169796 0.511425238741437 9.17990615314927 39.5981087828974)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape05" transform="matrix(0.833277219872563 -0.552855383297895 0.552855383297895 0.833277219872563 11.4144731733691 6.32853632373822)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape014" transform="matrix(0.833277219872563 -0.552855383297895 0.552855383297895 0.833277219872563 40.605237411498 50.3255735330094)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape06" transform="matrix(0.469796514432155 -0.88277473628747 0.88277473628747 0.469796514432155 2.38924627673885 18.0247639341253)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/><rect id="shape015" transform="matrix(0.469796514432155 -0.88277473628747 0.88277473628747 0.469796514432155 48.9997523527173 42.8300198961431)" fill="currentColor" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" width="4.8" height="7.2" rx="0.800000000000001" ry="2.4"/>
+				</svg>
+			</button>
+
+			<a id="to-git-source" href="https://github.com/L0neStarr/outage.bingo"><button>
+				<svg height="1024" width="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" transform="scale(64)" fill="#000"></path>
+				</svg>
+			</button></a>
+		</div>
+
 		<script src="./index.js"></script>
 		<script src="./eggs.js"></script>
 	</body>

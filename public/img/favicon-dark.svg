@@ -12,16 +12,16 @@
 <!-- default light palette -->
 <style>
     #back-shape {
-        fill: white;
-        stroke: #161A1D;
+        fill: #333;
+        stroke: #4E5A65;
     }
 
     #center-shape {
-        fill: aquamarine;
-        stroke: #161A1D;
+        fill: rgb(109, 218, 181);
+        stroke: #4E5A65;
     }
 
-    .grid-lines { stroke: #161A1D }
+    .grid-lines { stroke: #4E5A65 }
 </style>
 <rect id="back-shape" transform="translate(1.08, 1.08)" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="round" width="32.4" height="32.4" rx="6.59999948337289" ry="6.59999948337289"/>
 <path class="grid-lines" transform="matrix(1 0 0 0.977900559981343 11.76 1.3499998675568)" fill="none" stroke="#000000" stroke-width="2.16" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2" d="M0 32.58L0 0" sodipodi:nodetypes="cc"/>
