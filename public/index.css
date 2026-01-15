@@ -1,0 +1,411 @@
+:root {
+    /* numbers */
+    --n-margin-generic: 16px;
+    --n-table-border-size: 4px;
+    --n-table-border-radius: 10px;
+    --n-linkbox-transition-time: 1.5s;
+    --n-linkbox-bezier: cubic-bezier(0.6, 0, .5, .5);
+    --n-gap-generic: 8px;
+    --n-button-radius-generic: 4px;
+    --n-mobile-button-size: 38px;
+
+    /* color */
+    --c-svg-filter-bg-match: invert(100%) sepia(0%) saturate(1%) hue-rotate(326deg) brightness(106%) contrast(101%);
+    /* ^ update this filter anytime the background color needs to be changed */
+    /* https://codepen.io/sosuke/pen/Pjoqqp */
+    /* https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element */
+    --c-background: white;
+    --c-background-secondary: rgb(109, 218, 181);
+    --c-text-generic: black;
+    --c-text-bold: black;
+    --c-link: rgb(170, 127, 255);
+    --c-link-checked: rgb(255, 66, 183);
+
+    --c-table-border: #161A1D;
+    --c-table-cell-checked: aquamarine;
+    --c-table-cell-checked-2: rgb(109, 218, 181);
+    --c-table-cell-unchecked: white;
+    --c-table-cell-unchecked-2: azure;
+
+    --c-card-button: azure;
+    --c-card-button-border: #aaa;
+    --c-darkmode-toggle: aquamarine;
+    --c-darkmode-toggle-svg: #161A1D;
+    --c-darkmode-toggle-border: #161A1D;
+    --c-github-1: white;
+    --c-github-2: black;
+}
+.darkmode {
+    --c-svg-filter-bg-match: invert(3%) sepia(5%) saturate(1750%) hue-rotate(155deg) brightness(96%) contrast(96%);
+    --c-background: #0B0D0E;
+    --c-background-secondary: rgb(109, 218, 181);
+    --c-text-generic: #bbb;
+
+    --c-table-border: #4E5A65;
+    --c-table-cell-checked: rgb(109, 218, 181);
+    --c-table-cell-checked-2: rgb(100, 201, 167);
+    --c-table-cell-unchecked: #161A1D;
+    --c-table-cell-unchecked-2: #22262B;
+
+    --c-card-button: #6a6a6a;
+    --c-card-button-border: #555;
+    --c-darkmode-toggle: #0B0D0E;
+    --c-darkmode-toggle-svg: #888;
+    --c-darkmode-toggle-border: rgb(109, 218, 181);
+    --c-github-1: #888;
+}
+
+/* fonts */
+
+
+/* elements */
+/* background idea inspired by https://obby.dog/ */
+/* special thanks to this stack overflow thread for helping get the scrolling gradient to work: https://stackoverflow.com/questions/36612631/background-position-not-working-with-css-animation-and-linear-gradient */
+body {
+    z-index: 0;
+    min-height: 100vh;
+    margin: 0;
+
+    background-image: linear-gradient(var(--c-background), var(--c-background-secondary) 15%, var(--c-background) 30%);
+    /* filter: invert(3%) sepia(5%) saturate(1750%) hue-rotate(155deg) brightness(96%) contrast(96%); */
+    /* background-size: 50px 50px, 30% 200%; */
+    background-size: 30% 200%;
+    /* background-position: 25px 25px, 0 0; */
+
+    display: flex;
+    gap: var(--n-gap-generic);
+    flex-direction: column;
+    align-items: center;
+
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    animation: body-gradient-slide 10s linear infinite;
+}
+
+body::before {
+    content: "";
+    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    background-image: url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:krita="http://krita.org/namespaces/svg/krita" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" width="37.5252pt" height="37.5252pt" viewBox="0 0 37.5252 37.5252"><defs/><rect id="shape0" transform="translate(1.50100639503905, 1.50100639503905)" fill="black" fill-rule="evenodd" width="36.0241534809373" height="36.0241534809373"/></svg>');
+    background-size: 50px 50px;
+    background-position: 25px 25px;
+    filter: var(--c-svg-filter-bg-match);
+
+    animation: body-grid-slide 10s linear infinite;
+}
+
+body > * { z-index: 2}
+
+h1, h2, button, td, marquee, p { color: var(--c-text-generic) }
+
+h1, h2, button { margin: 0 }
+
+h1 { text-align: center }
+
+button {
+    cursor: pointer;
+    padding: 10px;
+}
+
+button:hover { animation: button-hover-react .1s ease-out forwards }
+
+a {
+    color: var(--c-link);
+    text-decoration: solid underline 2px;
+}
+a:visited { color: var(--c-link-checked) }
+
+marquee { font-weight: bold }
+
+
+/* named */
+/* "table" */
+#bingo-table {
+    width: min(80vw, 70vh);
+    aspect-ratio: 1;
+    background-color: var(--c-table-border);
+    border: solid var(--n-table-border-size) var(--c-table-border);
+    border-radius: var(--n-table-border-radius);
+
+    display: grid;
+    grid-auto-rows: calc((100% - var(--n-table-border-size) * 4) / 5);
+    gap: var(--n-table-border-size);
+}
+
+.bingo-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - var(--n-table-border-size) * 4) / 5);
+    gap: var(--n-table-border-size);
+}
+.bingo-row:first-child div:first-child { border-top-left-radius: var(--n-table-border-radius) }
+.bingo-row:first-child div:last-child { border-top-right-radius: var(--n-table-border-radius) }
+.bingo-row:last-child div:first-child { border-bottom-left-radius: var(--n-table-border-radius) }
+.bingo-row:last-child div:last-child { border-bottom-right-radius: var(--n-table-border-radius) }
+
+.cell-checked, .cell-unchecked {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 5px;
+    overflow: hidden;
+    font-size: min(100%, 1.7cqh, 2.5cqw);
+    /* credit to this stack overflow for introducing this fuck ass unit i've never heard of before; https://stackoverflow.com/questions/30693928/how-to-make-font-size-relative-to-parent-div */
+}
+
+.cell-unchecked {
+    color: var(--c-text-generic);
+    background-image: linear-gradient(var(--c-table-cell-unchecked) 80%, var(--c-table-cell-unchecked-2));
+}
+
+.cell-checked {
+    color: var(--c-text-bold);
+    background-image: linear-gradient(var(--c-table-cell-checked) 70%, var(--c-table-cell-checked-2));
+    font-weight: bold;
+}
+
+.cell-checked p { color: inherit }
+
+.cell-checked a {
+    display: grid;
+    align-items: center;
+}
+
+.cell-checked div {
+    width: 91%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.cell-checked div a {
+    flex: 1 0 30%;
+    /* font-size: 133%; */
+}
+
+/* other */
+#confetti {
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
+.invis {
+    visibility: hidden;
+}
+
+#card-new {
+    color: var(--c-text-bold);
+    background-color: var(--c-card-button);
+    font-weight: bold;
+    border-radius: var(--n-button-radius-generic);
+    border: 1px var(--c-card-button-border) solid;
+}
+
+#buttons-list {
+    z-index: 3;
+    position: fixed;
+    bottom: var(--n-margin-generic);
+    right: var(--n-margin-generic);
+
+    display: grid;
+    grid-auto-flow: column;
+    gap: 3px;
+    align-items: center;
+}
+
+#site-button { image-rendering: pixelated }
+.darkmode #site-button { filter: brightness(53%) }
+
+#to-git-source button {
+    height: 38px;
+    padding: 2px;
+    border: solid 2px black;
+    border-radius: 50%;
+    background-color: var(--c-github-1);
+}
+
+#to-git-source svg {
+    height: 30px;
+    width: 30px;
+}
+
+#darkmode-switch {
+    height: 38px;
+    width: 38px;
+    padding: 0;
+
+    display: grid;
+    justify-content: center;
+    align-items: center;
+
+    background-color: var(--c-darkmode-toggle);
+    border: solid 2px var(--c-darkmode-toggle-border);
+    border-radius: 50%;
+}
+
+#darkmode-switch svg {
+    color: var(--c-darkmode-toggle-svg);
+    height: 28px;
+    width: 28px;
+}
+#darkmode-switch svg:last-child { display: none; }
+
+/* dark mode switch behavior */
+.darkmode #darkmode-switch svg:first-child { display: none; }
+.darkmode #darkmode-switch svg:last-child { display: block; }
+
+#card-linkbox {
+    max-width: calc(100vw - 4 * var(--n-margin-generic));
+    position: relative;
+    padding: 10px;
+    border: 1px var(--c-card-button-border) solid;
+    border-radius: var(--n-button-radius-generic);
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+#card-linkbox::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background: var(--c-card-button);
+    transition: filter var(--n-linkbox-transition-time) var(--n-linkbox-bezier);
+}
+
+#card-linkbox p {
+    color: var(--c-text-bold);
+    margin: 0;
+    text-align: center;
+    pointer-events: none;
+    transition: opacity var(--n-linkbox-transition-time) var(--n-linkbox-bezier);
+    
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
+#card-linkbox p:last-child { 
+    position: absolute;
+    inset-block-start: .8cqh;
+    inset-inline-start: 50%;
+    transform: translate(-50%);
+    font-size: large;
+    opacity: 0;
+}
+
+#card-linkbox:hover::before { 
+    background-color: var(--c-table-cell-checked);
+}
+#card-linkbox:hover p { font-weight: bold }
+
+#card-linkbox:active::before {
+    filter: brightness(200%);
+    transition: 0s;
+}
+#card-linkbox:active p { transition: 0s }
+#card-linkbox:active p:first-child { opacity: .1 }
+#card-linkbox:active p:last-child { opacity: 1 }
+
+#share-options {
+    margin-bottom: var(--n-margin-generic);
+}
+
+#share-platforms {
+    display: flex;
+    justify-content: center;
+    gap: var(--n-gap-generic);
+}
+
+#share-platforms button {
+    width: min-content;
+    height: 50px;
+    border: solid 1px var(--c-card-button-border);
+    border-radius: var(--n-button-radius-generic);
+    padding: 0;
+    overflow: hidden;
+}
+
+#share-platforms img {
+    height: 50px;
+    aspect-ratio: 1;
+    pointer-events: none;
+}
+
+
+/* animations */
+@keyframes body-grid-slide {
+    0% {background-position: 25px 25px}
+    100% {background-position: 225px 225px}
+}
+
+@keyframes body-gradient-slide {
+    0% {background-position: 0 100%}
+    100% {background-position: 0 -100%}
+}
+
+@keyframes button-hover-react {
+    0% {position: relative; bottom: 0;}
+    90% {position: relative; bottom: 6px;}
+    100% {position: relative; bottom: 3px;}
+}
+
+@keyframes button-mobile-press-react {
+    0% {position: relative; bottom: 6px;}
+    100% {position: relative; bottom: 0;}
+}
+
+
+/* mobile adjustments */
+@media (max-aspect-ratio: .823) {
+    body > *:last-child { margin-bottom: var(--n-mobile-button-size) }
+
+    button:hover { animation: none }
+    button:active { animation: button-mobile-press-react .1s linear forwards }
+    /* button:hover, button:active { animation: button-mobile-press-react .1s linear forwards } */
+    /* https://stackoverflow.com/questions/22559756/changing-hover-to-touch-click-for-mobile-devices */
+
+    #bingo-table {
+        width: calc(100vw - var(--n-margin-generic));
+        /* height: calc(100vh - var(--n-margin-generic) * 2 - var(--n-mobile-button-size) * 2); */
+        aspect-ratio: 1;
+    }
+
+    #card-linkbox p { font-size: 3cqw }
+
+    #card-linkbox:hover::before {background-color: var(--c-card-button);}
+
+    #site-button { height: calc(var(--n-mobile-button-size) - 16px) }
+
+    #to-git-source button { height: var(--n-mobile-button-size) }
+
+    #to-git-source svg {
+        height: calc(var(--n-mobile-button-size) - 8px);
+        width: calc(var(--n-mobile-button-size) - 8px);
+    }
+
+    #darkmode-switch {
+        height: var(--n-mobile-button-size);
+        width: var(--n-mobile-button-size);
+    }
+
+    #darkmode-switch svg {
+        height: calc(var(--n-mobile-button-size) - 15px);
+        width: calc(var(--n-mobile-button-size) - 15px);
+    }
+}
