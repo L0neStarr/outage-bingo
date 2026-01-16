@@ -218,6 +218,7 @@ marquee { font-weight: bold }
     position: fixed;
     bottom: var(--n-margin-generic);
     right: var(--n-margin-generic);
+    transform: translateZ(0);
 
     display: grid;
     grid-auto-flow: column;
@@ -323,7 +324,7 @@ marquee { font-weight: bold }
 #card-linkbox:active p:last-child { opacity: 1 }
 
 #share-options {
-    margin-bottom: var(--n-margin-generic);
+    /* margin-bottom: var(--n-margin-generic); */
 }
 
 #share-platforms {
@@ -336,16 +337,19 @@ marquee { font-weight: bold }
     width: min-content;
     height: 50px;
     border: solid 1px var(--c-card-button-border);
-    border-radius: var(--n-button-radius-generic);
+    border-radius: 50%;
     padding: 0;
     overflow: hidden;
 }
 
-#share-platforms img {
-    height: 50px;
-    aspect-ratio: 1;
+#share-platforms object {
+    height: 48px;
+    width: 48px;
     pointer-events: none;
 }
+
+#twitter { background-color: black }
+#bluesky { background-color: #0185fd }
 
 
 /* animations */
@@ -373,7 +377,11 @@ marquee { font-weight: bold }
 
 /* mobile adjustments */
 @media (max-aspect-ratio: .823) {
-    body > *:last-child { margin-bottom: var(--n-mobile-button-size) }
+    /* body::after {
+        content: "";
+        height: calc(var(--n-mobile-button-size) * 2);
+        width: 1px;
+    } */
 
     button:hover { animation: none }
     button:active { animation: button-mobile-press-react .1s linear forwards }
@@ -384,6 +392,10 @@ marquee { font-weight: bold }
         width: calc(100vw - var(--n-margin-generic));
         /* height: calc(100vh - var(--n-margin-generic) * 2 - var(--n-mobile-button-size) * 2); */
         aspect-ratio: 1;
+    }
+
+    #buttons-list {
+        backface-visibility: hidden;
     }
 
     #card-linkbox p { font-size: 3cqw }
@@ -407,5 +419,12 @@ marquee { font-weight: bold }
     #darkmode-switch svg {
         height: calc(var(--n-mobile-button-size) - 15px);
         width: calc(var(--n-mobile-button-size) - 15px);
+    }
+
+    #share-platforms button { height: var(--n-mobile-button-size) }
+
+    #share-platforms object {
+        height: calc(var(--n-mobile-button-size) * .96);
+        width: calc(var(--n-mobile-button-size) * .96);
     }
 }

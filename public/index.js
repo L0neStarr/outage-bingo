@@ -1,5 +1,7 @@
 const canvas = document.getElementById("confetti")
 const confetti = new JSConfetti({ canvas })
+const utilityButtons = document.getElementById("buttons-list");
+const mql = window.matchMedia("(max-aspect-ratio: .823)");
 
 const possibleBingos = [
 	[0, 1, 2, 3, 4],
@@ -18,15 +20,16 @@ const possibleBingos = [
 	[20, 16, 12, 8, 4],
 ]
 
+var initialHeight = window.innerHeight;
 var storageDarkmode = localStorage.getItem('darkmode');
 var dataApiOutput = [];
 var dataShareLinks = {
 	"twitter": [
-		"share-icon-temp-twitter.png",
+		"icon-share-twitter.svg",
 		"https://twitter.com/share?url="
 	],
 	"bluesky": [
-		"share-icon-temp-bluesky.png",
+		"icon-share-bluesky.svg",
 		"https://bsky.app/intent/compose?text="
 	],
 	// "tumblr": [
@@ -344,7 +347,8 @@ function pageBingoConstruction(givenData) {
 		Object.keys(dataShareLinks).forEach((newKey) => {
 			newButton = document.createElement("button");
 			newButton.id = newKey;
-			newButton.innerHTML = `<img src="./img/${dataShareLinks[newKey][0]}"></img>`;
+			// newButton.innerHTML = `<img src="./img/${dataShareLinks[newKey][0]}"></img>`;
+			newButton.innerHTML = `<object data="./img/${dataShareLinks[newKey][0]}"></object>`;
 			elemSharePlatforms.appendChild(newButton);
 		});
 
@@ -397,4 +401,14 @@ function pageBingoConstruction(givenData) {
 		const marquee = document.getElementById("bingo")
 		marquee.innerText = "🔥".repeat(500)
 	}
+};
+
+
+// Fixed an ANNOYING fucking bug with fixed element positioning and the fuckass mobile address bar resizing the window
+// https://developer.mozilla.org/en-US/docs/Web/API/Window/innerHeight
+// https://medium.com/preprintblog/dont-use-vh-100-for-phone-webpage-it-ignores-the-address-bar-of-the-browser-chrome-safari-and-46c8a7fc5f2e
+if (mql.matches == true) {
+	window.addEventListener("resize", () => {
+		utilityButtons.style.bottom = `calc(var(--n-margin-generic) - (${window.innerHeight}px - ${initialHeight}px))`;
+	});
 };
