@@ -1,5 +1,7 @@
 const canvas = document.getElementById("confetti")
 const confetti = new JSConfetti({ canvas })
+const utilityButtons = document.getElementById("buttons-list");
+const mql = window.matchMedia("(max-aspect-ratio: .823)");
 
 const possibleBingos = [
 	[0, 1, 2, 3, 4],
@@ -18,7 +20,31 @@ const possibleBingos = [
 	[20, 16, 12, 8, 4],
 ]
 
+var initialHeight = window.innerHeight;
 var storageDarkmode = localStorage.getItem('darkmode');
+var dataApiOutput = [];
+var dataShareLinks = {
+	"twitter": [
+		"icon-share-twitter.svg",
+		"https://twitter.com/share?url="
+	],
+	"bluesky": [
+		"icon-share-bluesky.svg",
+		"https://bsky.app/intent/compose?text="
+	],
+	// "tumblr": [
+	// 	"share-icon-temp-tumblr.png",
+	// 	"https://www.tumblr.com/widgets/share/tool?shareSource=legacy&canonicalUrl=&tags=outage+bingo&url=outage-bingo.com",
+	// 	"&content=",
+	// 	"&caption="
+	// ],
+	// "reddit": [
+	// 	"share-icon-temp-reddit.png",
+	// 	"https://www.reddit.com/submit?",
+	// 	"url=",
+	// 	"&title="
+	// ]
+};
 
 
 // Parse the month and seed from the URL
@@ -161,10 +187,16 @@ function createNewCard(yyyy, mm) {
 	if (url.includes("?")) {
 		url = url.slice(0, url.indexOf("?"))
 	}
-	url += `?YYYY=${yyyy}`
-	url += `&MM=${mm}`
-	url += `&seed=${Math.floor(Math.random() * 99999)}`
-	window.location.assign(url)
+	newSeed = Math.floor(Math.random() * 99999);
+	urlValues = `?YYYY=${yyyy}`
+	urlValues += `&MM=${mm}`
+	urlValues += `&seed=${newSeed}`
+
+	// Url changes without reloading the page before shuffling and passing the card data
+	window.history.replaceState(url, "", urlValues);
+	let outputMirror = dataApiOutput.slice();
+	mutatedCardData = shuffle(outputMirror, newSeed);
+	pageBingoConstruction(mutatedCardData);
 }
 
 // Get the monthly outage bingo card 
@@ -175,22 +207,6 @@ async function apiFetch(yyyy, mm) {
 	
 	return await response.json()
 }
-
-// Dark mode theme switch
-function pageThemeSwitch(request) {
-	switch (request) {
-		case "enable":
-			document.body.classList.add("darkmode");
-			document.querySelector("link[rel~='icon']").href = "img/favicon-dark.svg";
-			localStorage.setItem("darkmode", "active");
-			break;
-
-		case "disable":
-			document.body.classList.remove("darkmode");
-			document.querySelector("link[rel~='icon']").href = "img/favicon.svg";
-			localStorage.setItem("darkmode", null);
-	};
-};
 
 
 // Fetch the data
@@ -206,6 +222,7 @@ function pageThemeSwitch(request) {
   	try {
 		// apiFetch returns the parsed JSON array
     	data = await apiFetch(params.yyyy, params.mm)
+		dataApiOutput = data.slice();
   	} catch (err) {
     	// If the file isn't there (404) or anything else fails, show message
     	const whoops = document.createElement("p")
@@ -227,10 +244,27 @@ function pageThemeSwitch(request) {
 	const shuffled = shuffle(data, params.seed)
 
 
-	// Cece note: converting the table element into a grid to handle styling
-	// and sizing issues with the table approach
-	const table = document.createElement("div");
-	table.id = "bingo-table";
+	// Cece notes:
+	// - converted the table element into a grid to better handle styling issues
+	// - this async function has now been bisected into two so that the bingo card creation can be done
+	// without any more reloads
+	pageBingoConstruction(shuffled);
+})()
+
+// Reusable card creation logic
+function pageBingoConstruction(givenData) {
+	// Checking for an existing bingo table on the page
+	var table;
+
+	if (document.getElementById("bingo-table")) {
+		table = document.getElementById("bingo-table");
+		table.innerHTML = "";
+	}
+	else {
+		table = document.createElement("div");
+		table.id = "bingo-table";
+	};
+	
 	// We're going to do a new array so that the final card will be in one
 	// smaller array just in case we have more than 24 options, and so that
 	// we can include the free space
@@ -252,7 +286,7 @@ function pageThemeSwitch(request) {
 					link: "free",
 				})
 			} else {
-				const cellData = shuffled.shift()
+				const cellData = givenData.shift()
 				finalCard.push(cellData)
 				cell = createBingoCell(cellData.name, cellData.link)
 			}
@@ -263,7 +297,9 @@ function pageThemeSwitch(request) {
 		table.appendChild(row)
 	}
 
-	document.querySelector("body").appendChild(table)
+	if (document.getElementById("bingo-table") == null) {
+		document.querySelector("body").appendChild(table);
+	};
 
 	/* Legacy New card button and function call.
 	const newCard = document.createElement("button")
@@ -274,27 +310,67 @@ function pageThemeSwitch(request) {
 	*/
 
 	// New card with new function call
-	const newCard = document.createElement("button")
-	newCard.id = "card-new"
-	newCard.innerText = "Get my own card"
-	newCard.onclick = () => {
-		createNewCard(params.yyyy, params.mm)
-	}	
-	
-	document.querySelector("body").appendChild(newCard)
+	if (document.getElementById("card-new") == undefined) {
+		const newCard = document.createElement("button")
+		newCard.id = "card-new"
+		newCard.innerText = "Get my own card"
+		newCard.onclick = () => {
+			createNewCard(params.yyyy, params.mm)
+		}	
+		
+		document.querySelector("body").appendChild(newCard)
+	};
 
 	// Checking url to see if the current card is a user created one, which creates the popup
 	if (window.location.href.includes("?")) {
-		const newDiv = document.createElement("div");
-		monthInt = parseInt(/MM=([0-9]+)&/g.exec(window.location.href)[1]);
-		monthTitle = new Date(Date.UTC(2020, monthInt, 1)).toLocaleDateString("en-US", {month: "long"});
+		monthTitle = new Date(Date.UTC(2020, params.mm, 1)).toLocaleDateString("en-US", {month: "long"});
+		shareText = `Check out my Outage Bingo board for ${monthTitle}: `;
 
-		newDiv.id = "card-linkbox";
-		newDiv.innerHTML = `<p>${window.location.href}</p><p>Copied :D</p>`;
-		newDiv.onclick = () => {
-			navigator.clipboard.writeText(`Check out my outage bingo board for ${monthTitle}: ${window.location.href}`);
+		// Check for if a linkbox already exists, and if it does it updates the window location in onclick
+		if (document.getElementById("card-linkbox")) {
+			previousLinkbox = document.getElementById("card-linkbox");
+			previousLinkbox.innerHTML = window.location.href;
+			previousLinkbox.onclick = () => { navigator.clipboard.writeText(`${shareText}${window.location.href}`) };
+
+			return;
 		};
-		document.body.appendChild(newDiv);
+
+		const elemShareOptions = document.createElement("div");
+		const elemSharePlatforms = document.createElement("div");
+
+		elemShareOptions.id = "share-options";
+		elemShareOptions.innerHTML = `<div id="card-linkbox" onclick="navigator.clipboard.writeText(\`${shareText}${window.location.href}\`)"><p>${window.location.href}</p><p>Copied :D</p></div>`;
+
+		elemSharePlatforms.id = "share-platforms";
+
+		// Buttons for every site listed in dataShareLinks are created
+		Object.keys(dataShareLinks).forEach((newKey) => {
+			newButton = document.createElement("button");
+			newButton.id = newKey;
+			// newButton.innerHTML = `<img src="./img/${dataShareLinks[newKey][0]}"></img>`;
+			newButton.innerHTML = `<object data="./img/${dataShareLinks[newKey][0]}"></object>`;
+			elemSharePlatforms.appendChild(newButton);
+		});
+
+		// All of the site specific share buttons are kept under one parent so that we can use just this one
+		// event listener to handle differences between how share links work
+		// Doing it this way also avoids having to refresh the window location on every single site button
+		elemSharePlatforms.addEventListener("click", (e) => {
+			if (e.target.nodeName != "BUTTON") return;
+
+			switch (e.target.id) {
+				case "tumblr":
+				case "reddit":
+					return;
+
+				default:
+					newEncodedUrl = encodeURIComponent(window.location.href);
+					window.open(`${dataShareLinks[e.target.id][1]}${shareText}${newEncodedUrl}`, "_blank");
+			}
+		});
+
+		elemShareOptions.appendChild(elemSharePlatforms);
+		document.body.appendChild(elemShareOptions);
 	};
 
 	let numBingos = 0
@@ -325,8 +401,14 @@ function pageThemeSwitch(request) {
 		const marquee = document.getElementById("bingo")
 		marquee.innerText = "🔥".repeat(500)
 	}
-})()
+};
 
 
-// Dark mode is auto enabled if the local storage variable is already set
-if (storageDarkmode === "active") pageThemeSwitch("enable");
+// Fixed an ANNOYING fucking bug with fixed element positioning and the fuckass mobile address bar resizing the window
+// https://developer.mozilla.org/en-US/docs/Web/API/Window/innerHeight
+// https://medium.com/preprintblog/dont-use-vh-100-for-phone-webpage-it-ignores-the-address-bar-of-the-browser-chrome-safari-and-46c8a7fc5f2e
+if (mql.matches == true) {
+	window.addEventListener("resize", () => {
+		utilityButtons.style.bottom = `calc(var(--n-margin-generic) - (${window.innerHeight}px - ${initialHeight}px))`;
+	});
+};
