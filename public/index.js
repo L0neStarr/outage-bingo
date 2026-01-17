@@ -21,8 +21,10 @@ const possibleBingos = [
 ]
 
 var initialHeight = window.innerHeight;
+var initialConfettiCheck = false;
 var storageDarkmode = localStorage.getItem('darkmode');
 var dataApiOutput = [];
+var dataFinalCard = [];
 var dataShareLinks = {
 	"twitter": [
 		"icon-share-twitter.svg",
@@ -196,7 +198,9 @@ function createNewCard(yyyy, mm) {
 	window.history.replaceState(url, "", urlValues);
 	let outputMirror = dataApiOutput.slice();
 	mutatedCardData = shuffle(outputMirror, newSeed);
+
 	pageBingoConstruction(mutatedCardData);
+	dataConfettiCheck();
 }
 
 // Get the monthly outage bingo card 
@@ -208,50 +212,7 @@ async function apiFetch(yyyy, mm) {
 	return await response.json()
 }
 
-
-// Fetch the data
-;(async () => {
-	// Loads the latest outages-#.json from the root dir
-	// If there isn't a file present, 404 error and create a message for the user
-	// This will stay to support legacy .json files
-	// OLD BEHAVIOR const response = await fetch(`./outages-1.json`)
-
- 	document.getElementById("loading").remove()
-
-  	let data
-  	try {
-		// apiFetch returns the parsed JSON array
-    	data = await apiFetch(params.yyyy, params.mm)
-		dataApiOutput = data.slice();
-  	} catch (err) {
-    	// If the file isn't there (404) or anything else fails, show message
-    	const whoops = document.createElement("p")
-    	whoops.innerText =
-      	"Whoops, looks like we haven't made a card for this month yet, check back later"
-    	document.querySelector("body").appendChild(whoops)
-    	console.error(err)
-    	return
-  	}
-
-	// Set the header to reflect the YYYY/MM params
-	const title = document.createElement("h2")
-	title.innerText = new Date(Date.UTC(params.yyyy, params.mm, 1)).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-	})
-	document.querySelector("body").appendChild(title)
-
-	const shuffled = shuffle(data, params.seed)
-
-
-	// Cece notes:
-	// - converted the table element into a grid to better handle styling issues
-	// - this async function has now been bisected into two so that the bingo card creation can be done
-	// without any more reloads
-	pageBingoConstruction(shuffled);
-})()
-
-// Reusable card creation logic
+// Reusable card creation logic taken from async
 function pageBingoConstruction(givenData) {
 	// Checking for an existing bingo table on the page
 	var table;
@@ -268,7 +229,8 @@ function pageBingoConstruction(givenData) {
 	// We're going to do a new array so that the final card will be in one
 	// smaller array just in case we have more than 24 options, and so that
 	// we can include the free space
-	const finalCard = []
+	// Cece note: FinalCard(now dataFinalCard) has been moved to a global variable
+	dataFinalCard = []
 
 	for (let i = 0; i < 5; i++) {
 		const row = document.createElement("div")
@@ -281,13 +243,13 @@ function pageBingoConstruction(givenData) {
 				cell = document.createElement("div")
 				cell.innerText = "Free Space (Fortnet Vulnerability)"
 				cell.className = "cell-checked"
-				finalCard.push({
+				dataFinalCard.push({
 					name: "Free Space (Fortnet Vulnerability)",
 					link: "free",
 				})
 			} else {
 				const cellData = givenData.shift()
-				finalCard.push(cellData)
+				dataFinalCard.push(cellData)
 				cell = createBingoCell(cellData.name, cellData.link)
 			}
 
@@ -372,28 +334,38 @@ function pageBingoConstruction(givenData) {
 		elemShareOptions.appendChild(elemSharePlatforms);
 		document.body.appendChild(elemShareOptions);
 	};
+};
 
+// Confetti function taken from async
+function dataConfettiCheck() {
 	let numBingos = 0
+	const marquee = document.getElementById("bingo")
+
 	possibleBingos.forEach((line) => {
 		if (
 			line.every((index) => {
-				const link = finalCard[index].link // CHANGED: store link for clearer/consistent checked logic
+				const link = dataFinalCard[index].link // CHANGED: store link for clearer/consistent checked logic
 				return (Array.isArray(link) ? link.length > 0 : link !== "") // CHANGED: [] is now treated as unchecked; non-empty array or non-empty string counts as checked
 			})
 		)
 			numBingos++
 	})
 
+	if (numBingos == 0) {
+		marquee.classList.add("invis")
+	};
+
 	if (numBingos > 0) {
+		marquee.classList.remove("invis")
+		marquee.innerText = `${numBingos} bingo${numBingos > 1 ? "s" : ""}`
+
+		if (initialConfettiCheck == true) return;
 		setTimeout(() => {
 			confetti.addConfetti({
 				emojis: ["⚡️", "💥", "🔥"],
 				confettiNumber: 20 * numBingos,
 			})
 		}, 1000)
-		const marquee = document.getElementById("bingo")
-		marquee.classList.remove("invis")
-		marquee.innerText = `${numBingos} bingo${numBingos > 1 ? "s" : ""}`
 	}
 
 	if (numBingos === possibleBingos.length) {
@@ -401,7 +373,55 @@ function pageBingoConstruction(givenData) {
 		const marquee = document.getElementById("bingo")
 		marquee.innerText = "🔥".repeat(500)
 	}
+
+	initialConfettiCheck = true;
 };
+
+
+// Fetch the data
+;(async () => {
+	// Loads the latest outages-#.json from the root dir
+	// If there isn't a file present, 404 error and create a message for the user
+	// This will stay to support legacy .json files
+	// OLD BEHAVIOR const response = await fetch(`./outages-1.json`)
+
+ 	document.getElementById("loading").remove()
+
+  	let data
+  	try {
+		// apiFetch returns the parsed JSON array
+    	data = await apiFetch(params.yyyy, params.mm)
+		dataApiOutput = data.slice();
+  	} catch (err) {
+    	// If the file isn't there (404) or anything else fails, show message
+    	const whoops = document.createElement("p")
+    	whoops.innerText =
+      	"Whoops, looks like we haven't made a card for this month yet, check back later"
+    	document.querySelector("body").appendChild(whoops)
+    	console.error(err)
+    	return
+  	}
+
+	// Set the header to reflect the YYYY/MM params
+	const title = document.createElement("h2")
+	title.innerText = new Date(Date.UTC(params.yyyy, params.mm, 1)).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+	})
+	document.querySelector("body").appendChild(title)
+
+	const shuffled = shuffle(data, params.seed)
+
+
+	// Cece notes:
+	// - converted the table element into a grid to better handle styling issues
+	// - this async function has now been bisected into two so that the bingo card creation can be done
+	// without any more reloads
+	// - bingo checking has simmilarly been split into its own function so that new cards don't create confetti
+	// on reroll, and so that the banner has an accurate bingo count
+	pageBingoConstruction(shuffled);
+	dataConfettiCheck();
+})()
 
 
 // Fixed an ANNOYING fucking bug with fixed element positioning and the fuckass mobile address bar resizing the window
