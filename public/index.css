@@ -3,6 +3,7 @@
     --n-margin-generic: 16px;
     --n-table-border-size: 4px;
     --n-table-border-radius: 10px;
+    --n-table-cell-box-shadow-radius: 10px;
     --n-linkbox-transition-time: 1.5s;
     --n-linkbox-bezier: cubic-bezier(0.6, 0, .5, .5);
     --n-gap-generic: 8px;
@@ -24,10 +25,13 @@
     --c-table-border: #161A1D;
     --c-table-cell-checked: aquamarine;
     --c-table-cell-checked-2: rgb(109, 218, 181);
+    --c-table-cell-checked-inner-shadow: #04824F;
     --c-table-cell-unchecked: white;
     --c-table-cell-unchecked-2: azure;
+    --c-table-cell-unchecked-inner-shadow: #708090;
 
     --c-card-button: azure;
+    --c-card-button-2: #D7F4F4;;
     --c-card-button-border: #aaa;
     --c-darkmode-toggle: aquamarine;
     --c-darkmode-toggle-svg: #161A1D;
@@ -43,11 +47,14 @@
 
     --c-table-border: #4E5A65;
     --c-table-cell-checked: rgb(109, 218, 181);
-    --c-table-cell-checked-2: rgb(100, 201, 167);
+    --c-table-cell-checked-2: rgb(64, 194, 150);
+    --c-table-cell-checked-inner-shadow: #074D31;
     --c-table-cell-unchecked: #161A1D;
     --c-table-cell-unchecked-2: #22262B;
+    --c-table-cell-unchecked-inner-shadow: #434D56;
 
     --c-card-button: #6a6a6a;
+    --c-card-button-2: #888;
     --c-card-button-border: #555;
     --c-darkmode-toggle: #0B0D0E;
     --c-darkmode-toggle-svg: #888;
@@ -67,10 +74,7 @@ body {
     margin: 0;
 
     background-image: linear-gradient(var(--c-background), var(--c-background-secondary) 15%, var(--c-background) 30%);
-    /* filter: invert(3%) sepia(5%) saturate(1750%) hue-rotate(155deg) brightness(96%) contrast(96%); */
-    /* background-size: 50px 50px, 30% 200%; */
     background-size: 30% 200%;
-    /* background-position: 25px 25px, 0 0; */
 
     display: flex;
     gap: var(--n-gap-generic);
@@ -100,6 +104,8 @@ body::before {
 }
 
 body > * { z-index: 2}
+
+body > *:last-child { margin-bottom: var(--n-margin-generic) }
 
 h1, h2, button, td, marquee, p { color: var(--c-text-generic) }
 
@@ -163,11 +169,13 @@ marquee { font-weight: bold }
 .cell-unchecked {
     color: var(--c-text-generic);
     background-image: linear-gradient(var(--c-table-cell-unchecked) 80%, var(--c-table-cell-unchecked-2));
+    box-shadow: 0 0 var(--n-table-cell-box-shadow-radius) -3px var(--c-table-cell-unchecked-inner-shadow) inset;
 }
 
 .cell-checked {
     color: var(--c-text-bold);
     background-image: linear-gradient(var(--c-table-cell-checked) 70%, var(--c-table-cell-checked-2));
+    box-shadow: 0 0 var(--n-table-cell-box-shadow-radius) -3px var(--c-table-cell-checked-inner-shadow) inset;
     font-weight: bold;
 }
 
@@ -207,7 +215,7 @@ marquee { font-weight: bold }
 
 #card-new {
     color: var(--c-text-bold);
-    background-color: var(--c-card-button);
+    background: linear-gradient(var(--c-card-button) 70%, var(--c-card-button-2));
     font-weight: bold;
     border-radius: var(--n-button-radius-generic);
     border: 1px var(--c-card-button-border) solid;
@@ -285,7 +293,7 @@ marquee { font-weight: bold }
     top: 0;
     left: 0;
     z-index: -1;
-    background: var(--c-card-button);
+    background: linear-gradient(var(--c-card-button) 70%, var(--c-card-button-2));
     transition: filter var(--n-linkbox-transition-time) var(--n-linkbox-bezier);
 }
 
@@ -311,7 +319,7 @@ marquee { font-weight: bold }
 }
 
 #card-linkbox:hover::before { 
-    background-color: var(--c-table-cell-checked);
+    background: var(--c-table-cell-checked);
 }
 #card-linkbox:hover p { font-weight: bold }
 
@@ -322,10 +330,6 @@ marquee { font-weight: bold }
 #card-linkbox:active p { transition: 0s }
 #card-linkbox:active p:first-child { opacity: .1 }
 #card-linkbox:active p:last-child { opacity: 1 }
-
-#share-options {
-    /* margin-bottom: var(--n-margin-generic); */
-}
 
 #share-platforms {
     display: flex;
@@ -338,6 +342,15 @@ marquee { font-weight: bold }
     height: 50px;
     border: solid 1px var(--c-card-button-border);
     border-radius: 50%;
+    background-image:
+        radial-gradient(
+            90% 50% at 50% 0,
+            rgba(from currentcolor calc(r + 45) calc(g + 45) calc(b + 45) / .5) 97%,
+            transparent 100%
+        ),
+
+        linear-gradient(rgb(from currentcolor calc(r - 60) calc(g - 60) calc(b - 60)), currentcolor 80%)
+    ;
     padding: 0;
     overflow: hidden;
 }
@@ -348,8 +361,13 @@ marquee { font-weight: bold }
     pointer-events: none;
 }
 
-#twitter { background-color: black }
-#bluesky { background-color: #0185fd }
+#email { color: #aaa }
+#twitter { color: black }
+#bluesky { color: #0185fd }
+#tumblr { color: #2c4261 }
+#reddit { color: #fc4302 }
+#facebook { color: #1b76f4 }
+#linkedin { color: #1c74bd }
 
 
 /* animations */
@@ -375,17 +393,28 @@ marquee { font-weight: bold }
 }
 
 
+/* media queries */
+/* adding a bit of space at the bottom of the screen for the utility buttons to scroll down to cause they get */
+/* in the way of the share buttons otherwise */
+@media (max-width: 835px) {
+    body::after {
+        content: "";
+        height: calc(var(--n-mobile-button-size));
+        width: 1px;
+    }
+}
+
 /* mobile adjustments */
 @media (max-aspect-ratio: .823) {
-    /* body::after {
-        content: "";
-        height: calc(var(--n-mobile-button-size) * 2);
-        width: 1px;
-    } */
+    :root {
+        --n-table-cell-box-shadow-radius: 7px;
+    }
+    .darkmode {
+        --c-table-cell-unchecked-inner-shadow: #708090;
+    }
 
     button:hover { animation: none }
     button:active { animation: button-mobile-press-react .1s linear forwards }
-    /* button:hover, button:active { animation: button-mobile-press-react .1s linear forwards } */
     /* https://stackoverflow.com/questions/22559756/changing-hover-to-touch-click-for-mobile-devices */
 
     #bingo-table {

@@ -26,6 +26,12 @@ var storageDarkmode = localStorage.getItem('darkmode');
 var dataApiOutput = [];
 var dataFinalCard = [];
 var dataShareLinks = {
+	"email": [
+		"icon-share-email.svg",
+		"mailto:?",
+		"body=",
+		"&subject="	
+	],
 	"twitter": [
 		"icon-share-twitter.svg",
 		"https://twitter.com/share?url="
@@ -34,20 +40,44 @@ var dataShareLinks = {
 		"icon-share-bluesky.svg",
 		"https://bsky.app/intent/compose?text="
 	],
-	// "tumblr": [
-	// 	"share-icon-temp-tumblr.png",
-	// 	"https://www.tumblr.com/widgets/share/tool?shareSource=legacy&canonicalUrl=&tags=outage+bingo&url=outage-bingo.com",
-	// 	"&content=",
-	// 	"&caption="
+	"tumblr": [
+		"icon-share-tumblr.svg",
+		"https://www.tumblr.com/widgets/share/tool?shareSource=legacy&canonicalUrl=&tags=outage+bingo&posttype=link&url=outage-bingo.com",
+		"&content=",
+		"&caption="
+	],
+	"reddit": [
+		"icon-share-reddit.svg",
+		"https://www.reddit.com/submit?",
+		"url=",
+		"&title="
+	],
+	// "instagram": [
+	// 	"icon-share-instagram.svg",
+	// 	"?"
 	// ],
-	// "reddit": [
-	// 	"share-icon-temp-reddit.png",
-	// 	"https://www.reddit.com/submit?",
-	// 	"url=",
-	// 	"&title="
-	// ]
+	"facebook": [
+		"icon-share-facebook.svg",
+		"https://www.facebook.com/sharer/sharer.php?u="
+	],
+	"linkedin": [
+		"icon-share-linkedin.svg",
+		"https://www.linkedin.com/sharing/share-offsite/?url="
+	]
 };
 
+
+
+// Fixing broken url parameters from tumblr links with regex and spite
+// Explination: https://stackoverflow.com/questions/23157922/why-is-this-tumblr-share-messing-up-the-ampersand
+if (window.location.href.match(/amp;/g)) {
+	url = window.location.href;
+	fixedUrlParams = url.slice(url.indexOf("?"), url.length - 1);
+	fixedUrlParams = fixedUrlParams.replace(/amp;/g, "");
+	url = url.slice(0, url.indexOf("?"));
+
+	window.history.replaceState(url, "", fixedUrlParams);
+};
 
 // Parse the month and seed from the URL
 const urlParams = new URLSearchParams(location.search)
@@ -286,13 +316,13 @@ function pageBingoConstruction(givenData) {
 	// Checking url to see if the current card is a user created one, which creates the popup
 	if (window.location.href.includes("?")) {
 		monthTitle = new Date(Date.UTC(2020, params.mm, 1)).toLocaleDateString("en-US", {month: "long"});
-		shareText = `Check out my Outage Bingo board for ${monthTitle}: `;
+		shareText = `Check out my Outage Bingo board for ${monthTitle}`;
 
 		// Check for if a linkbox already exists, and if it does it updates the window location in onclick
 		if (document.getElementById("card-linkbox")) {
 			previousLinkbox = document.getElementById("card-linkbox");
 			previousLinkbox.innerHTML = window.location.href;
-			previousLinkbox.onclick = () => { navigator.clipboard.writeText(`${shareText}${window.location.href}`) };
+			previousLinkbox.onclick = () => { navigator.clipboard.writeText(`${shareText}: ${window.location.href}`) };
 
 			return;
 		};
@@ -301,7 +331,7 @@ function pageBingoConstruction(givenData) {
 		const elemSharePlatforms = document.createElement("div");
 
 		elemShareOptions.id = "share-options";
-		elemShareOptions.innerHTML = `<div id="card-linkbox" onclick="navigator.clipboard.writeText(\`${shareText}${window.location.href}\`)"><p>${window.location.href}</p><p>Copied :D</p></div>`;
+		elemShareOptions.innerHTML = `<div id="card-linkbox" onclick="navigator.clipboard.writeText(\`${shareText}: ${window.location.href}\`)"><p>${window.location.href}</p><p>Copied :D</p></div>`;
 
 		elemSharePlatforms.id = "share-platforms";
 
@@ -309,7 +339,6 @@ function pageBingoConstruction(givenData) {
 		Object.keys(dataShareLinks).forEach((newKey) => {
 			newButton = document.createElement("button");
 			newButton.id = newKey;
-			// newButton.innerHTML = `<img src="./img/${dataShareLinks[newKey][0]}"></img>`;
 			newButton.innerHTML = `<object data="./img/${dataShareLinks[newKey][0]}"></object>`;
 			elemSharePlatforms.appendChild(newButton);
 		});
@@ -319,15 +348,42 @@ function pageBingoConstruction(givenData) {
 		// Doing it this way also avoids having to refresh the window location on every single site button
 		elemSharePlatforms.addEventListener("click", (e) => {
 			if (e.target.nodeName != "BUTTON") return;
+			var newEncodedUrl = encodeURIComponent(window.location.href);
 
 			switch (e.target.id) {
+				case "email":
 				case "tumblr":
 				case "reddit":
+					spefShareData = dataShareLinks[e.target.id];
+					window.open(`${spefShareData[1]}${spefShareData[2]}${newEncodedUrl}${spefShareData[3]}${shareText}`, "_blank");
+					return;
+
+				case "facebook":
+				case "linkedin":
+					// Linkedin(and also facebook hi) is fucking weeirrdd and takes the meta properties of the
+					// website as input values instead of url parameters/its own shitty api like a normal site,
+					// which makes it impossible to see with "npm run dev" if this code actually works
+					// 
+					// Linkedin:
+					// https://stackoverflow.com/questions/33426752/linkedin-share-post-url
+					// https://www.linkedin.com/help/linkedin/answer/a521928/making-your-website-shareable-on-linkedin?lang=en
+					// ^ There is a site provided here that tells me how well the current website passes its metadata
+					// checks, you can view in the results below it really just needs a longer description;
+					// https://www.linkedin.com/post-inspector/inspect/outage-bingo.com
+					// 
+					// Facebook:
+					// https://stackoverflow.com/questions/16463030/how-to-add-facebook-share-button-on-my-website
+					// https://web.archive.org/web/20130911185530/https://developers.facebook.com/docs/plugins/share/
+					// https://developers.facebook.com/docs/sharing/webmasters
+					// ^ Facebook also has a url testing tool of its own but you need to login to even use the thing
+					// Very very annoying
+					// https://developers.facebook.com/tools/debug/
+
+					window.open(`${dataShareLinks[e.target.id][1]}${newEncodedUrl}`, "_blank");
 					return;
 
 				default:
-					newEncodedUrl = encodeURIComponent(window.location.href);
-					window.open(`${dataShareLinks[e.target.id][1]}${shareText}${newEncodedUrl}`, "_blank");
+					window.open(`${dataShareLinks[e.target.id][1]}${shareText}: ${newEncodedUrl}`, "_blank");
 			}
 		});
 
@@ -353,6 +409,7 @@ function dataConfettiCheck() {
 
 	if (numBingos == 0) {
 		marquee.classList.add("invis")
+		marquee.innerText = "";
 	};
 
 	if (numBingos > 0) {
@@ -429,6 +486,7 @@ function dataConfettiCheck() {
 // https://medium.com/preprintblog/dont-use-vh-100-for-phone-webpage-it-ignores-the-address-bar-of-the-browser-chrome-safari-and-46c8a7fc5f2e
 if (mql.matches == true) {
 	window.addEventListener("resize", () => {
-		utilityButtons.style.bottom = `calc(var(--n-margin-generic) - (${window.innerHeight}px - ${initialHeight}px))`;
+		utilityButtons.style.bottom = "0"
+		utilityButtons.style.top = `calc(${window.innerHeight}px - var(--n-margin-generic) - var(--n-mobile-button-size))`;
 	});
 };
